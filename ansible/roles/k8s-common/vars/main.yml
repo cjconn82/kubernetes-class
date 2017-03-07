@@ -1,0 +1,8 @@
+k8s_services:
+  - pkg: etcd
+    svc: etcd
+  - pkg: ntp
+    svc: ntpd
+  - pkg: kubernetes
+  - pkg: docker
+    svc: docker

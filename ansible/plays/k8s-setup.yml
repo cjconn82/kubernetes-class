@@ -1,0 +1,28 @@
+--- # Setup the minion nodes of a k8 cluster
+
+# Common Setup for master and nodes
+- hosts: k8s_all
+  remote_user: vagrant
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - k8s-common
+
+# Setup for master controller
+- hosts: k8s_master
+  remote_user: vagrant
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - k8s-master
+
+# Setup for nodes (minions)
+- hosts: k8s_nodes
+  remote_user: vagrant
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - k8s-node

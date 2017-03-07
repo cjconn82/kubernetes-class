@@ -1,0 +1,11 @@
+# Role to setup Kubernetes Nodes (Minions)
+
+- name: Setup kubernetes config files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: yes
+  with_items: "{{ config_files }}"
+  notify:
+    - EnableServices
+    - RestartServices

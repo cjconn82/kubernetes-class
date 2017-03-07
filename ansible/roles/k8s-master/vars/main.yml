@@ -1,0 +1,10 @@
+config_files:
+  - src: etc/kubernetes/apiserver
+    dest: /etc/kubernetes/apiserver
+  - src: etc/kubernetes/config
+    dest: /etc/kubernetes/config
+
+k8s_services:
+  - svc: kube-apiserver
+  - svc: kube-controller-manager
+  - svc: kube-scheduler

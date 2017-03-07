@@ -1,0 +1,12 @@
+config_files:
+  - src: etc/kubernetes/apiserver
+    dest: /etc/kubernetes/apiserver
+  - src: etc/kubernetes/config
+    dest: /etc/kubernetes/config
+  - src: etc/kubernetes/kubelet
+    dest: /etc/kubernetes/kubelet
+
+k8s_services:
+  - svc: kube-proxy
+  - svc: kubelet
+  - svc: docker

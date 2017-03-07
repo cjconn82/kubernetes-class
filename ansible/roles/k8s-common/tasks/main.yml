@@ -1,0 +1,34 @@
+# Role to setup Kubernetes Common tasks
+
+- name: Create /etc/yum.repos.d/virt7-docker-common-release yum repo
+  yum_repository:
+    name: virt7-docker-common-release
+    description: RHEL7 Docker Common Release
+    baseurl: http://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
+    gpgcheck: no
+    enabled: yes
+
+- name: Install packages
+  yum:
+    name: "{{ item.pkg }}"
+    state: latest
+    update_cache: yes
+  with_items: "{{ k8s_services }}"
+  notify:
+    - EnableServices
+    - RestartServices
+
+- name: Add vagrant user to dockerroot group
+  user:
+    name: vagrant
+    groups: dockerroot
+    append: yes
+
+- name: Add dockerroot group to /etc/docker/daemon.json
+  copy:
+    src: etc/docker/daemon.json
+    dest: /etc/docker/daemon.json
+    mode: 0644
+  notify:
+    - EnableServices
+    - RestartServices

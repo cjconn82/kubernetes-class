@@ -1,0 +1,14 @@
+---
+
+#Restart services
+- name: EnableServices
+  service:
+    name: "{{ item.svc }}"
+    enabled: yes
+  with_items: "{{ k8s_services }}"
+
+- name: RestartServices
+  service:
+    name: "{{ item.svc }}"
+    state: restarted
+  with_items: "{{ k8s_services }}"

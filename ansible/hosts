@@ -1,0 +1,27 @@
+master ansible_ssh_private_key_file=/vagrant/.vagrant/machines/master/virtualbox/private_key
+minion1 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/minion1/virtualbox/private_key
+minion2 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/minion2/virtualbox/private_key
+minion3 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/minion3/virtualbox/private_key
+
+[local]
+localhost
+
+[ansible]
+master
+
+[minions]
+minion1
+minion2
+minion3
+
+[k8s_master]
+master
+
+[k8s_nodes]
+minion1
+minion2
+minion3
+
+[k8s_all:children]
+k8s_master
+k8s_nodes

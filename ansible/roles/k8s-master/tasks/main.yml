@@ -1,0 +1,17 @@
+# Role to setup Kubernetes Master
+
+- name: Install etcd
+  yum:
+    name: etcd
+    state: latest
+    update_cache: yes
+
+- name: Setup kubernetes config files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: yes
+  with_items: "{{ config_files }}"
+  notify:
+    - EnableServices
+    - RestartServices
