@@ -1,37 +1,63 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant.configure(2) do |config|
-  config.vm.box = "geerlingguy/centos7"
-  if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
-    config.vm.synced_folder ".", "/vagrant", mount_options: ["dmode=700,fmode=600"], type: "virtualbox"
-  else
-    config.vm.synced_folder ".", "/vagrant"
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+if File.file?('.vagrant/vagrant.yml')
+  SETTINGS_FILE = ENV['SETTINGS_FILE'] || '.vagrant/vagrant.yml'
+else
+  SETTINGS_FILE = ENV['SETTINGS_FILE'] || 'vagrant.yml'
+end
+
+require 'yaml'
+
+SETTINGS = YAML.load_file SETTINGS_FILE
+BOX_NAME = SETTINGS['default']['box']
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = BOX_NAME
+  config.vm.box_url = SETTINGS['default']['box_url'] if SETTINGS['default'].has_key?('box_url')
+  config.vm.provider "virtualbox" do |v|
+    v.memory = SETTINGS['default']['memory']
+    v.cpus = SETTINGS['default']['cpus']
+    v.gui = false
   end
 
-  (1..3).each do |i|
-    config.vm.define "minion#{i}" do |d|
-      d.vm.hostname = "minion#{i}"
-      d.vm.network "private_network", ip: "10.100.198.20#{i}"
-      d.vm.provision :shell, path: "scripts/bootstrap_all.sh", privileged: false
-      d.vm.provider "virtualbox" do |v|
-        v.memory = 512
-        v.gui = false
-      end
+  config.vbguest.auto_update = SETTINGS['default']['vbguest_auto_update']
+  if SETTINGS['default'].has_key?('ca_certificates_enabled')
+    config.ca_certificates.enabled = SETTINGS['default']['ca_certificates_enabled']
+
+    if ARGV.include?('up') || ARGV.include?('provision')
+      # Run vagrant-ca-certificates plugin
+      # printf "Running the vagrant-ca-certificates plugin: %s\n", Dir.glob(SETTINGS['default']['ca_certificates_certs'])
+      config.ca_certificates.certs = Dir.glob(SETTINGS['default']['ca_certificates_certs'])
     end
+
+    config.vm.box_download_ca_cert = SETTINGS['default']['box_download_ca_cert']
   end
 
-  config.vm.define "master" do |d|
-    d.vm.hostname = "master"
-    d.vm.network "private_network", ip: "10.100.198.200"
-    d.vm.network "forwarded_port", guest: 2379, host: 2379
-    d.vm.network "forwarded_port", guest: 8080, host: 18080
-    d.vm.network "forwarded_port", guest: 10250, host: 10250
-    d.vm.provision :shell, path: "scripts/bootstrap_ansible.sh", privileged: false
-    d.vm.provision :shell, inline: "ansible-playbook /vagrant/ansible/plays/k8s-setup.yml", privileged: false
-    d.vm.provider "virtualbox" do |v|
-      v.memory = 512
-      v.gui = false
+  if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+    config.vm.synced_folder '.', '/vagrant', mount_options: ['dmode=700,fmode=600'], type: 'virtualbox'
+  else
+    config.vm.synced_folder '.', '/vagrant'
+  end
+
+  SETTINGS['vms'].each do |name, vm|
+    config.vm.define name do |c|
+      c.vm.hostname = "#{name}"
+      c.vm.network 'private_network', ip: vm['ip_address']
+      c.vm.provision :shell, path: vm['bootstrap_script'], privileged: false
+      if vm.has_key?('ansible_playbook')
+        c.vm.provision :shell, inline: vm['ansible_playbook'], privileged: false
+      end
+
+      if vm.has_key?('memory') || vm.has_key?('cpus')
+        c.vm.provider "virtualbox" do |v|
+          v.memory = vm['memory'] if vm.has_key?('memory')
+          v.cpus = vm['cpus'] if vm.has_key?('cpus')
+        end
+      end
     end
   end
 

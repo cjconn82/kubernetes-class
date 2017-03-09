@@ -1,2 +1,5 @@
 .vagrant
+certs
+vagrant_*.yml
 ansible/log
+

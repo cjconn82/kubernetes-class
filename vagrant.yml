@@ -1,0 +1,24 @@
+default:
+  box: "geerlingguy/centos7"
+  vbguest_auto_update: true
+  memory: 512
+  cpus: 1
+
+vms:
+  minion1:
+    ip_address: 10.100.198.201
+    memory: 512
+    bootstrap_script: 'scripts/bootstrap_all.sh'
+  minion2:
+    ip_address: 10.100.198.202
+    memory: 512
+    bootstrap_script: 'scripts/bootstrap_all.sh'
+  minion3:
+    ip_address: 10.100.198.203
+    memory: 512
+    bootstrap_script: 'scripts/bootstrap_all.sh'
+  master:
+    ip_address: 10.100.198.200
+    memory: 512
+    bootstrap_script: 'scripts/bootstrap_ansible.sh'
+    ansible_playbook: 'ansible-playbook /vagrant/ansible/plays/k8s-setup.yml'
