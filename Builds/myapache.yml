@@ -8,4 +8,3 @@ spec:
     image: latest123/apache
     ports:
     - containerPort: 80
-    
